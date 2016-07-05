@@ -22,7 +22,6 @@
 
     // Private fields
     var $container,
-        $scroller,
         itemsPerScreen,
         lastRepaintOffset,
         lastScrolledTime,
@@ -50,7 +49,8 @@
 
       $container.scroll(onScroll);
 
-      $scroller = $('<div />')
+      // init hidden scroller
+      $('<div />')
         .css('opacity', '0')
         .css('position', 'absolute')
         .css('top', 0)
@@ -59,16 +59,23 @@
         .css('height', options.itemHeight * options.totalCount + 'px')
         .appendTo($container);
 
+      // calculate number of items per screen
       itemsPerScreen = Math.ceil(options.height / options.itemHeight);
 
-      // render first screen
-      renderScreenFrom(0, itemsPerScreen * 2);
+      // render first screen with some amount of cache
+      renderItemsFrom(0, itemsPerScreen * 2);
 
-      // delete obsolete nodes periodically
+      // delete hidden items periodically
       setInterval(gc, 300);
     }
 
-    function renderScreenFrom(idx, toIdx) {
+    /**
+     * Renders items from index idx to toIdx.
+     *
+     * @param      {number}  idx     First element index.
+     * @param      {number}  toIdx   Last element index (not included).
+     */
+    function renderItemsFrom(idx, toIdx) {
       if (toIdx > options.totalCount) {
         toIdx = options.totalCount;
       }
@@ -108,6 +115,11 @@
       $container.append(items);
     }
 
+    /**
+     * Renders item by calling third-party render function.
+     *
+     * @param      {number}  idx     Item index.
+     */
     function renderItem(idx) {
       var item = options.render(idx);
 
@@ -117,8 +129,12 @@
         .css('top', (idx * options.itemHeight) + 'px');
     }
 
+    /**
+     * Collects garbage by removing hidden elements from DOM.
+     */
     function gc() {
       if (Date.now() - lastScrolledTime < 100) {
+        // do not do garbage collection while scrolling
         return;
       }
 
@@ -129,11 +145,15 @@
       });
 
       if (counter > 0) {
-        console.log('GC: removed ' + counter);
         garbage = {};
       }
     }
 
+    /**
+     * Scroll event handler.
+     *
+     * @param      {Event}  event   JQuery Event object.
+     */
     function onScroll(event) {
       var scrollTop = event.target.scrollTop;
       if (!lastRepaintOffset || Math.abs(scrollTop - lastRepaintOffset) > options.height) {
@@ -142,7 +162,7 @@
         firstIdx = firstIdx < 0 ? 0 : firstIdx;
         
         // rendering items one screen before and one screen after the current position
-        renderScreenFrom(firstIdx, firstIdx + 3 * itemsPerScreen);
+        renderItemsFrom(firstIdx, firstIdx + 3 * itemsPerScreen);
         lastRepaintOffset = scrollTop;
       }
 
