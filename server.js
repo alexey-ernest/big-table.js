@@ -3,12 +3,16 @@ var express = require('express');
 var app = express();
 
 var RECS = ['buy', 'hold', 'sell'];
+
+/**
+ * Generates dataset item.
+ */
 function generateItem() {
   var i, name = '';
-  
   for (i = 0; i < Math.random() * 5 + 1; i++) {
     name += String.fromCharCode(parseInt(65 + Math.random() * 26));
   }
+
   var item = {
     name: name,
     active: Math.random() >= 0.5,
@@ -19,6 +23,9 @@ function generateItem() {
   return item;
 }
 
+/**
+ * Generates data set.
+ */
 app.get('/data/:size', function (req, res) {
   var size = +req.params.size;
 
@@ -30,6 +37,11 @@ app.get('/data/:size', function (req, res) {
 
   res.send(data);
 });
+
+/**
+ * Serves static.
+ */
+app.use('/', express.static(__dirname));
 
 app.listen(3000, function () {
   console.log('Listening on http://localhost:3000');

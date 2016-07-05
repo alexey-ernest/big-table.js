@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BigTable.js Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="/big-table.js"></script>
+  </head>
+  <body>
+    <h1>Hello</h1>
+    <div class="table"></div>
+    <script>
+      var table = new BigTable({
+        container: '.table',
+        totalCount: 1000,
+        render: function (idx) {
+          return $('<div />').text(idx);
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -2,7 +2,7 @@
   "name": "big-table.js",
   "version": "1.0.0",
   "description": "High performance JavaScript table for large data sets.",
-  "main": "index.js",
+  "main": "big-table.js",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
