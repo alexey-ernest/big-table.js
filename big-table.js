@@ -26,7 +26,8 @@
         itemsPerScreen,
         lastRepaintOffset,
         lastScrolledTime,
-        garbage = [];
+        garbage = {},
+        cache = {};
 
     /**
      * Inits a table for a container.
@@ -72,29 +73,44 @@
         toIdx = options.totalCount;
       }
 
-      // render visible items
-      var i, items = [];
-      for (i = idx; i < toIdx; i++) {
-        items.push(renderItem(i));
-      }
-
-      // mark obsolete items for deletion
-      $container.children().each(function (i, item) {
-        if (i === 0) {
-          // skip scroller
+      // marking invisible items for deletion
+      Object.keys(cache).forEach(function (i) {
+        if (i >= idx && i < toIdx) {
           return;
         }
 
-        var $item = $(item);
-        $item.hide();
-        garbage.push($item);
+        garbage[i] = cache[i];
+        garbage[i].hide();
+        delete cache[i];
       });
+
+      // rendering visible items
+      var i, items = [];
+      for (i = idx; i < toIdx; i++) {
+        if (cache[i] !== undefined) {
+          // already rendered
+          continue;
+        }
+        if (garbage[i] !== undefined) {
+          // not yet garbage collected
+          cache[i] = garbage[i];
+          cache[i].show();
+          delete garbage[i];
+          continue;
+        }
+
+        // rendering item
+        var $item = renderItem(i);
+        items.push($item);
+        cache[i] = $item;
+      }
 
       $container.append(items);
     }
 
     function renderItem(idx) {
       var item = options.render(idx);
+
       return $(item)
         .css('height', options.itemHeight + 'px')
         .css('position', 'absolute')
@@ -102,15 +118,20 @@
     }
 
     function gc() {
-      if (Date.now() - lastScrolledTime < 100 || !garbage.length) {
+      if (Date.now() - lastScrolledTime < 100) {
         return;
       }
-      var i;
-      for (i = 0; i < garbage.length; i++) {
+
+      var counter = 0;
+      Object.keys(garbage).forEach(function (i) {
         garbage[i].remove();
+        counter++;
+      });
+
+      if (counter > 0) {
+        console.log('GC: removed ' + counter);
+        garbage = {};
       }
-      console.log('Removed ' + garbage.length);
-      garbage.length = 0;
     }
 
     function onScroll(event) {
