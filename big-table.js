@@ -1,10 +1,8 @@
-(function ($) {
-  'use strict';
+/*jslint white: true */
+/*global window */
 
-  // Export BigTable class.
-  $.extend(window, {
-    BigTable: BigTable
-  });
+(function (window, $) {
+  'use strict';
 
   /**
    * Creates a new instance of BigTable
@@ -18,7 +16,7 @@
       height: 500,
       itemHeight: 25,
       totalCount: 1000
-    }
+    };
 
     // Private fields
     var $container,
@@ -26,47 +24,21 @@
         lastRepaintOffset,
         lastScrolledTime,
         garbage = {},
-        cache = {};
+        cache = {},
+        gcInterval;
 
     /**
-     * Inits a table for a container.
+     * Renders item by calling third-party render function.
+     *
+     * @param      {number}  idx     Item index.
      */
-    function init() {
-      $container = $(options.container);
-      if ($container.length < 1) {
-        throw new Error('Could not find ' + options.container + ' element in the DOM.');
-      }
+    function renderItem(idx) {
+      var item = options.render(idx);
 
-      options = $.extend({}, defaults, options);
-
-      // init container
-      $container
-        .empty()
-        .css('height', options.height + 'px')
-        .css('overflow', 'auto')
-        .css('position', 'relative')
-        .css('padding', '0');
-
-      $container.scroll(onScroll);
-
-      // init hidden scroller
-      $('<div />')
-        .css('opacity', '0')
+      return $(item)
+        .css('height', options.itemHeight + 'px')
         .css('position', 'absolute')
-        .css('top', 0)
-        .css('left', 0)
-        .css('width', '1px')
-        .css('height', options.itemHeight * options.totalCount + 'px')
-        .appendTo($container);
-
-      // calculate number of items per screen
-      itemsPerScreen = Math.ceil(options.height / options.itemHeight);
-
-      // render first screen with some amount of cache
-      renderItemsFrom(0, itemsPerScreen * 2);
-
-      // delete hidden items periodically
-      setInterval(gc, 300);
+        .css('top', (idx * options.itemHeight) + 'px');
     }
 
     /**
@@ -93,40 +65,20 @@
 
       // rendering visible items
       var i, items = [];
-      for (i = idx; i < toIdx; i++) {
-        if (cache[i] !== undefined) {
-          // already rendered
-          continue;
-        }
-        if (garbage[i] !== undefined) {
+      for (i = idx; i < toIdx; i+=1) {
+        if (cache[i] === undefined && garbage[i] === undefined) {
+          // not yet rendered rendered
+          cache[i] = renderItem(i);
+          items.push(cache[i]);
+        } else if (garbage[i] !== undefined) {
           // not yet garbage collected
           cache[i] = garbage[i];
           cache[i].show();
           delete garbage[i];
-          continue;
         }
-
-        // rendering item
-        var $item = renderItem(i);
-        items.push($item);
-        cache[i] = $item;
       }
 
       $container.append(items);
-    }
-
-    /**
-     * Renders item by calling third-party render function.
-     *
-     * @param      {number}  idx     Item index.
-     */
-    function renderItem(idx) {
-      var item = options.render(idx);
-
-      return $(item)
-        .css('height', options.itemHeight + 'px')
-        .css('position', 'absolute')
-        .css('top', (idx * options.itemHeight) + 'px');
     }
 
     /**
@@ -138,13 +90,11 @@
         return;
       }
 
-      var counter = 0;
       Object.keys(garbage).forEach(function (i) {
         garbage[i].remove();
-        counter++;
       });
 
-      if (counter > 0) {
+      if (Object.keys(garbage).length > 0) {
         garbage = {};
       }
     }
@@ -160,7 +110,7 @@
         // we scrolled more than 1 screen
         var firstIdx = parseInt(scrollTop / options.itemHeight) - itemsPerScreen;
         firstIdx = firstIdx < 0 ? 0 : firstIdx;
-        
+
         // rendering items one screen before and one screen after the current position
         renderItemsFrom(firstIdx, firstIdx + 3 * itemsPerScreen);
         lastRepaintOffset = scrollTop;
@@ -170,10 +120,71 @@
       event.preventDefault();
     }
 
+    /**
+     * Inits a table for a container.
+     */
+    function init() {
+      $container = $(options.container);
+      if ($container.length < 1) {
+        throw new Error('Could not find ' + options.container + ' element in the DOM.');
+      }
+
+      options = $.extend({}, defaults, options);
+
+      // init container
+      $container
+        .empty()
+        .css('height', options.height + 'px')
+        .css('overflow', 'auto')
+        .css('position', 'relative')
+        .css('padding', '0');
+
+      $container.on('scroll', onScroll);
+
+      // init hidden scroller
+      $('<div />')
+        .css('opacity', '0')
+        .css('position', 'absolute')
+        .css('top', 0)
+        .css('left', 0)
+        .css('width', '1px')
+        .css('height', options.itemHeight * options.totalCount + 'px')
+        .appendTo($container);
+
+      // calculate number of items per screen
+      itemsPerScreen = Math.ceil(options.height / options.itemHeight);
+
+      // render first screen with some amount of cache
+      renderItemsFrom(0, itemsPerScreen * 2);
+
+      // delete hidden items periodically
+      gcInterval = setInterval(gc, 300);
+    }
+
+    /**
+     * Destroyes the table and all it's data.
+     */
+    function destroy() {
+      $container.off('scroll');
+      clearInterval(gcInterval);
+      
+      delete this.cache;
+      delete this.garbage;
+      $container.empty();
+    }
+
     // Init
     init();
 
-    return this;
+    // Public interface
+    return {
+      destroy: destroy
+    };
   }
-})
-(window.jQuery);
+
+  // Export BigTable class.
+  $.extend(window, {
+    BigTable: BigTable
+  });
+
+}(window, window.jQuery));
