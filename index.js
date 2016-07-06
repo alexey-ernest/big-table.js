@@ -9,37 +9,23 @@
 
   function BigTableApp() {
     // vars
-    var table,
-        data;
+    var table;
 
-    function compare(a, b) {
-      if (a.val < b.val) {
-        return -1;
-      }
-      if (a.val > b.val) {
-        return 1;
-      }
-      return 0;
-    }
-
-    function redraw() {
-      var start, end;
-
-      start = new Date().getTime();
-      data = data.sort(compare);
-      end = new Date().getTime();
-      console.log('Sorting time: ' + (end - start));
-
-      start = new Date().getTime();
-      table.redraw();
-      end = new Date().getTime();
-      console.log('Redraw time: ' + (end - start));
+    function measureTime(fn, comment) {
+      var start = new Date().getTime();
+      fn();
+      var end = new Date().getTime();
+      console.log(comment + ': ' + (end - start));
     }
 
     function loadData(fn) {
       $.ajax('/data/100000')
       .done(function (res) {
-        data = res;
+        // set index for each item to visualize sorting order
+        res.forEach(function (i, idx) {
+          i.idx = idx;
+        });
+
         fn(res);
       });
     }
@@ -49,6 +35,16 @@
       var columns = [
         {
           name: '#', 
+          map: function (i) {
+            return data[i].idx; 
+          }, 
+          sort: function () {
+            measureTime(function () {
+              data.sort(function (a, b) {
+                return a.idx - b.idx;
+              });
+            }, 'Sort by index');
+          },
           css: {'big-table__cell_col-1': true}
         },
         {
@@ -56,13 +52,33 @@
           map: function (i) {
             return data[i].key; 
           }, 
+          sort: function () {
+            measureTime(function () {
+              data.sort(function (a, b) {
+                if (a.key > b.key) {
+                  return 1;
+                }
+                if (a.key < b.key) {
+                  return -1;
+                }
+                return 0;
+              });
+            }, 'Sort by key');
+          },
           css: {'big-table__cell_col-2': true}
         },
         {
           name: 'Value', 
           map: function (i) { 
             return data[i].val.toFixed(4); 
-          }, 
+          },
+          sort: function () {
+            measureTime(function () {
+              data.sort(function (a, b) {
+                return a.val - b.val;
+              });
+            }, 'Sort by value');
+          },
           css: {'big-table__cell_col-3': true}
         },
         {
@@ -70,6 +86,13 @@
           map: function (i) { 
             return data[i].delta.toFixed(4); 
           }, 
+          sort: function () {
+            measureTime(function () {
+              data.sort(function (a, b) {
+                return a.delta - b.delta;
+              });
+            }, 'Sort by delta');
+          },
           css: {
             'big-table__cell_col-3': true,
             'big-table__cell_color-red': function (val) {
@@ -92,6 +115,19 @@
           map: function (i) { 
             return data[i].rec; 
           }, 
+          sort: function () {
+            measureTime(function () {
+              data.sort(function (a, b) {
+                if (a.rec > b.rec) {
+                  return 1;
+                }
+                if (a.rec < b.rec) {
+                  return -1;
+                }
+                return 0;
+              });
+            }, 'Sort by rec');
+          },
           css: {
             'big-table__cell_col-1': true,
             'big-table__cell_font-bold': function (val) {
@@ -117,14 +153,9 @@
     }
 
     init();
-
-    // Public interface
-    return {
-      redraw: redraw
-    };
   }
 
-  // Export BigTable class.
+  // Export App class.
   $.extend(window, {
     App: new BigTableApp()
   });

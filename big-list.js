@@ -145,7 +145,8 @@
         .css('height', options.height + 'px')
         .css('overflow', 'auto')
         .css('position', 'relative')
-        .css('padding', '0');
+        .css('padding', '0')
+        .css('clear', 'both');
 
       $container.on('scroll', onScroll);
 
