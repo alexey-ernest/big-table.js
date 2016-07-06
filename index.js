@@ -27,19 +27,19 @@
       // define table columns
       var columns = [
         {
-          name: '#', 
+          title: '#', 
           type: Number, 
           key: 'idx',
           css: {'big-table__cell_col-1': true}
         },
         {
-          name: 'Key', 
+          title: 'Key', 
           type: String,
           key: 'key',
           css: {'big-table__cell_col-2': true}
         },
         {
-          name: 'Value', 
+          title: 'Value', 
           type: Number,
           key: 'val',
           format: function (i) {
@@ -48,7 +48,7 @@
           css: {'big-table__cell_col-3': true}
         },
         {
-          name: 'Delta', 
+          title: 'Delta', 
           type: Number,
           key: 'delta',
           format: function (i) {
@@ -65,7 +65,7 @@
           }
         },
         {
-          name: 'Open?', 
+          title: 'Open?', 
           type: Boolean,
           key: 'active',
           format: function (i) {
@@ -74,7 +74,7 @@
           css: {'big-table__cell_col-2': true}
         },
         {
-          name: 'Rec', 
+          title: 'Rec', 
           type: String,
           key: 'rec',
           css: {

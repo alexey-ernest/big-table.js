@@ -9,8 +9,9 @@
 
   /**
    * Creates a new instance of BigTable.
+   * 
    * options.columns should be in following format: 
-   * [{name: string, type: Type, key: String, format: val1 => val2, css: {class1: val1 => true|false}}]
+   * [{title: string, type: Type, key: String, format: val1 => val2, css: {class1: val1 => true|false}}]
    *
    * @class      BigTable
    * @param      {Objects}  options    Table options: {container, data, columns}.
@@ -86,7 +87,7 @@
         if (options.columns[i].type !== Boolean) {
           classes.push('big-table__cell_type-sortable');
         }
-        header.appendChild(renderCell(options.columns[i].name, classes));
+        header.appendChild(renderCell(options.columns[i].title, classes));
       }
 
       return $(header);
