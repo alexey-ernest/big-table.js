@@ -7,6 +7,7 @@ High performance JavaScript table for large data sets.
 * [Options](#options)
 * [Column definition](#column-definitions)
 * [API](#api)
+* [Demo](#demo)
 
 ## Features
 * Virtual scrolling (only visible items are rendered), hence minimal memory usage.
@@ -26,6 +27,7 @@ High performance JavaScript table for large data sets.
 
 
 ## How to use
+
 
 ```
 <link rel="stylesheet" href="/themes/default/theme.default.css">
@@ -88,3 +90,15 @@ Example:
 Method | Description
 :-- | :--
 destroy | Destroys the table and all it's data.
+
+
+## Demo
+
+```
+$ npm install
+$ npm start
+```
+
+```
+Got to http://localhost:3000/
+```
