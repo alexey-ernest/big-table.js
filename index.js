@@ -94,8 +94,6 @@
         itemHeight: 40,
         columns: columns
       });
-
-      setTimeout(table.destroy, 10000);
     }
 
     function init() {
