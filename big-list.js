@@ -5,12 +5,12 @@
   'use strict';
 
   /**
-   * Creates a new instance of BigTable
+   * Creates a new instance of BigList
    *
-   * @class      BigTable
+   * @class      BigList
    * @param      {Objects}  options    Table options.
    */
-  function BigTable (options) {
+  function BigList (options) {
     // Default settings
     var defaults = {
       height: 500,
@@ -38,7 +38,9 @@
       return $(item)
         .css('height', options.itemHeight + 'px')
         .css('position', 'absolute')
-        .css('top', (idx * options.itemHeight) + 'px');
+        .css('top', (idx * options.itemHeight) + 'px')
+        .css('left', '0')
+        .css('right', '0');
     }
 
     /**
@@ -167,7 +169,7 @@
     function destroy() {
       $container.off('scroll');
       clearInterval(gcInterval);
-      
+
       delete this.cache;
       delete this.garbage;
       $container.empty();
@@ -182,9 +184,9 @@
     };
   }
 
-  // Export BigTable class.
+  // Export BigList class.
   $.extend(window, {
-    BigTable: BigTable
+    BigList: BigList
   });
 
 }(window, window.jQuery));

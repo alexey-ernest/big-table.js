@@ -4,20 +4,59 @@
     <title>BigTable.js Demo</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="/big-table.js"></script>
+    <script src="/big-list.js"></script>
   </head>
   <body>
     <h1>Hello</h1>
-    <div class="table"></div>
+    <div class="big-table"></div>
     <script>
-      var table = new BigTable({
-        container: '.table',
-        totalCount: 100000,
-        render: function (idx) {
-          return $('<div />').text(idx);
+
+      function createCell(text, classes) {
+        if (classes.constructor !== Array) {
+          classes = classes.split(' ');
         }
-      });
+
+        var cell = document.createElement('div');
+        var i;
+        for (i = 0; i < classes.length; i++) {
+          cell.classList.add(classes[i]);
+        }
+
+        var textNode = document.createTextNode(text);
+        cell.appendChild(textNode);
+        return cell;
+      }
+
+      $.ajax('data/10000')
+        .done(function (data) {
+          var table = new BigList({
+            container: '.big-table',
+            totalCount: data.length,
+            height: 300,
+            itemHeight: 40,
+            render: function (i) {
+              var row = document.createElement('div');
+              row.classList.add('big-table__row');
+              
+              var cells = [];
+              cells[0] = createCell(i, 'big-table__cell big-table__cell_col-1');
+              cells[1] = createCell(data[i].key, 'big-table__cell big-table__cell_col-2');
+              cells[2] = createCell(data[i].val, 'big-table__cell big-table__cell_col-3');
+              cells[3] = createCell(data[i].delta, 'big-table__cell big-table__cell_col-3');
+              cells[4] = createCell(data[i].active, 'big-table__cell big-table__cell_col-2');
+              cells[5] = createCell(data[i].rec, 'big-table__cell big-table__cell_col-1');
+
+              var i;
+              for (i = 0; i < cells.length; i++) {
+                row.appendChild(cells[i]);
+              }
+              
+              return $(row);
+            }
+          });
+        });
     </script>
   </body>
 </html>

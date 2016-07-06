@@ -1,3 +1,4 @@
+/*jslint white: true */
 
 var express = require('express');
 var app = express();
@@ -8,13 +9,13 @@ var RECS = ['buy', 'hold', 'sell'];
  * Generates dataset item.
  */
 function generateItem() {
-  var i, name = '';
+  var i, key = '';
   for (i = 0; i < Math.random() * 5 + 1; i++) {
-    name += String.fromCharCode(parseInt(65 + Math.random() * 26));
+    key += String.fromCharCode(parseInt(65 + Math.random() * 26));
   }
 
   var item = {
-    name: name,
+    key: key,
     active: Math.random() >= 0.5,
     val: Math.random() * 1000,
     delta: Math.random() * 10 - 5,
