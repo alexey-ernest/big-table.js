@@ -2,12 +2,12 @@
 High performance JavaScript table for large data sets.
 
 * [Features](#features)
+* [Demo](#demo)
 * [Dependencies](#dependencies)
 * [How to use](#how-to-use)
 * [Options](#options)
 * [Column definition](#column-definitions)
 * [API](#api)
-* [Demo](#demo)
 
 ## Features
 * Virtual scrolling (only visible items are rendered), hence minimal memory usage.
@@ -17,6 +17,21 @@ High performance JavaScript table for large data sets.
 * Sortable columns: Numeric and String columns are sortable, sorting time about ~100ms for 100K data set of randomized values.
 * Custom CSS classes and value formatters.
 * Simple default css theme included.
+
+
+## Demo
+
+```
+$ npm install
+$ npm start
+```
+
+```
+Go to http://localhost:3000/
+```
+
+![](assets/screenshot.png?raw=true)
+
 
 ## Dependencies
 * jQuery
@@ -90,15 +105,3 @@ Example:
 Method | Description
 :-- | :--
 destroy | Destroys the table and all it's data.
-
-
-## Demo
-
-```
-$ npm install
-$ npm start
-```
-
-```
-Got to http://localhost:3000/
-```
