@@ -29,25 +29,19 @@
         {
           name: '#', 
           type: Number, 
-          map: function (i) {
-            return i.idx; 
-          },
+          key: 'idx',
           css: {'big-table__cell_col-1': true}
         },
         {
           name: 'Key', 
           type: String,
-          map: function (i) {
-            return i.key; 
-          }, 
+          key: 'key',
           css: {'big-table__cell_col-2': true}
         },
         {
           name: 'Value', 
           type: Number,
-          map: function (i) { 
-            return i.val; 
-          },
+          key: 'val',
           format: function (i) {
             return i.toFixed(4);
           },
@@ -56,9 +50,7 @@
         {
           name: 'Delta', 
           type: Number,
-          map: function (i) { 
-            return i.delta; 
-          },
+          key: 'delta',
           format: function (i) {
             return i.toFixed(4);
           },
@@ -75,9 +67,7 @@
         {
           name: 'Open?', 
           type: Boolean,
-          map: function (i) { 
-            return i.active; 
-          }, 
+          key: 'active',
           format: function (i) {
             return i ? 'open' : 'closed'; 
           },
@@ -86,9 +76,7 @@
         {
           name: 'Rec', 
           type: String,
-          map: function (i) { 
-            return i.rec; 
-          }, 
+          key: 'rec',
           css: {
             'big-table__cell_col-1': true,
             'big-table__cell_font-bold': function (val) {

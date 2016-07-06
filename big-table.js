@@ -10,7 +10,7 @@
   /**
    * Creates a new instance of BigTable.
    * options.columns should be in following format: 
-   * [{name: string, type: Type, map: val1 => val2, format: val1 => val2, css: {class1: val1 => true|false}}]
+   * [{name: string, type: Type, key: String, format: val1 => val2, css: {class1: val1 => true|false}}]
    *
    * @class      BigTable
    * @param      {Objects}  options    Table options: {container, data, columns}.
@@ -112,7 +112,7 @@
       
       var i, val, classes;
       for (i = 0; i < options.columns.length; i+=1) {
-        val = options.columns[i].map ? options.columns[i].map(options.data[ridx]) : '';
+        val = options.columns[i].key ? options.data[ridx][options.columns[i].key] : '';
 
         classes = getCellClasses(i, val);
         classes.push('big-table__cell');
@@ -154,13 +154,12 @@
     /**
      * Numberic comparator helper function.
      *
-     * @param      {Function}  map      Function for mapping objects to their
-     *                                  values.
-     * @param      {Boolean}   reverse  Indicates if reverse order required.
+     * @param      {string}   key      Object key to compare.
+     * @param      {Boolean}  reverse  Indicates if reverse order required.
      */
-    function compareNumeric(map, reverse) {
+    function compareNumeric(key, reverse) {
       return function (a, b) {
-        var res = map(a) - map(b);  
+        var res = a[key] - b[key];
         return !reverse ? res : -res;
       };
     }
@@ -168,16 +167,15 @@
     /**
      * String comparator helper function.
      *
-     * @param      {Function}  map      Function for mapping objects to their
-     *                                  values.
-     * @param      {Boolean}   reverse  Indicates if reverse order required.
+     * @param      {string}   key      Object key to compare.
+     * @param      {Boolean}  reverse  Indicates if reverse order required.
      */
-    function compareString(map, reverse) {
+    function compareString(key, reverse) {
       return function (a, b) {
-        if (map(a) > map(b)) {
+        if (a[key] > b[key]) {
           return !reverse ? 1 : -1;
         }
-        if (map(a) < map(b)) {
+        if (a[key] < b[key]) {
           return !reverse ? -1 : 1;
         }
         return 0;
@@ -197,11 +195,11 @@
         sortOrder = false;  
       }
 
-      var mapFunction = options.columns[i].map;
+      var key = options.columns[i].key;
       if (options.columns[i].type === Number) {
-        options.data.sort(compareNumeric(mapFunction, sortOrder));
+        options.data.sort(compareNumeric(key, sortOrder));
       } else if (options.columns[i].type === String) {
-        options.data.sort(compareString(mapFunction, sortOrder));
+        options.data.sort(compareString(key, sortOrder));
       } else {
         return;
       }
