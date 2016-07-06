@@ -115,9 +115,22 @@
       bigList = new BigList(options);
     }
 
+    /**
+     * Destroys a table.
+     */
     function destroy() {
       if (bigList) {
         bigList.destroy();
+        bigList = null;
+      }
+    }
+
+    /**
+     * Re-draws a table.
+     */
+    function redraw() {
+      if (bigList) {
+        bigList.redraw();
       }
     }
 
@@ -125,7 +138,8 @@
 
     // Public interface
     return {
-      destroy: destroy
+      destroy: destroy,
+      redraw: redraw
     };
   }
 

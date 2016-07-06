@@ -89,9 +89,11 @@
 
     /**
      * Collects garbage by removing hidden elements from DOM.
+     *
+     * @param      {boolean}  force   Indicates whether to force garbage collection.
      */
-    function gc() {
-      if (Date.now() - lastScrolledTime < 100) {
+    function gc(force) {
+      if (!force && Date.now() - lastScrolledTime < 100) {
         // do not do garbage collection while scrolling
         return;
       }
@@ -168,6 +170,23 @@
     }
 
     /**
+     * Re-draws visible items.
+     */
+    function redraw() {
+      // remove items
+      $.extend(garbage, cache);
+      gc(true);
+
+      // getting first and last index
+      var indexes = Object.keys(cache).map(function (k) { return parseInt(k); });
+      indexes = indexes.sort(function (a, b) {
+        return a - b;
+      });
+      cache = {};
+      renderItemsFrom(indexes[0], indexes[indexes.length - 1] + 1);
+    }
+
+    /**
      * Destroyes the list and all it's data.
      */
     function destroy() {
@@ -184,7 +203,8 @@
 
     // Public interface
     return {
-      destroy: destroy
+      destroy: destroy,
+      redraw: redraw
     };
   }
 

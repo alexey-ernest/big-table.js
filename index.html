@@ -10,8 +10,14 @@
     <script src="/big-table.js"></script>
   </head>
   <body>
+    <button onclick="redraw();">Redraw</button>
     <div class="big-table"></div>
     <script>
+      var table;
+      function redraw() {
+        table.redraw();
+      }
+
       $.ajax('data/100000')
         .done(function (data) {
 
@@ -70,7 +76,7 @@
             }
           ]
 
-          var table = new BigTable({
+          table = new BigTable({
             container: '.big-table',
             totalCount: data.length,
             height: 500,
