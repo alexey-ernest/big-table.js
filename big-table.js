@@ -11,7 +11,7 @@
    * Creates a new instance of BigTable.
    * 
    * options.columns should be in following format: 
-   * [{title: string, type: Type, key: String, format: val1 => val2, css: {class1: val1 => true|false}}]
+   * [{title: String, type: Type, key: String, format: val1 => val2, css: {class1: val1 => true|false}}]
    *
    * @class      BigTable
    * @param      {Objects}  options    Table options: {container, data, columns}.
