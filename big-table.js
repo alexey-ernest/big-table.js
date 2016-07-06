@@ -10,23 +10,25 @@
   /**
    * Creates a new instance of BigTable.
    * options.columns should be in following format: 
-   * [{name: string, map: idx => val, sort: () => (), css: {class1: val1 => true|false}}]
+   * [{name: string, type: Type, map: val1 => val2, format: val1 => val2, css: {class1: val1 => true|false}}]
    *
    * @class      BigTable
-   * @param      {Objects}  options    Table options: {container, totalCount, columns}.
+   * @param      {Objects}  options    Table options: {container, data, columns}.
    */
   function BigTable (options) {
     // Default settings
     var defaults = {
       container: undefined,
-      totalCount: undefined,
+      data: undefined,
       columns: undefined,
       render: renderRow
     };
 
     // Private fields
     var bigList,
-        $header;
+        $header,
+        sortColumn,
+        sortOrder;
 
     /**
      * Renders table cell with text.
@@ -81,7 +83,7 @@
         classes.push('big-table__cell');
 
         // appending cell
-        if (options.columns[i].sort) {
+        if (options.columns[i].type !== Boolean) {
           classes.push('big-table__cell_type-sortable');
         }
         header.appendChild(renderCell(options.columns[i].name, classes));
@@ -110,10 +112,13 @@
       
       var i, val, classes;
       for (i = 0; i < options.columns.length; i+=1) {
-        val = options.columns[i].map ? options.columns[i].map(ridx) : ridx;
+        val = options.columns[i].map ? options.columns[i].map(options.data[ridx]) : '';
 
         classes = getCellClasses(i, val);
         classes.push('big-table__cell');
+
+        // formatting value
+        val = options.columns[i].format ? options.columns[i].format(val) : val;
 
         // appending cell
         row.appendChild(renderCell(val, classes));
@@ -129,8 +134,8 @@
       if (!options.container) {
         throw new Error('container option required.');
       }
-      if (!options.totalCount) {
-        throw new Error('totalCount option required.');
+      if (!options.data) {
+        throw new Error('data option required.');
       }
       if (!options.columns) {
         throw new Error('columns option required.');
@@ -147,18 +152,71 @@
     }
 
     /**
+     * Numberic comparator helper function.
+     *
+     * @param      {Function}  map      Function for mapping objects to their
+     *                                  values.
+     * @param      {Boolean}   reverse  Indicates if reverse order required.
+     */
+    function compareNumeric(map, reverse) {
+      return function (a, b) {
+        var res = map(a) - map(b);  
+        return !reverse ? res : -res;
+      };
+    }
+
+    /**
+     * String comparator helper function.
+     *
+     * @param      {Function}  map      Function for mapping objects to their
+     *                                  values.
+     * @param      {Boolean}   reverse  Indicates if reverse order required.
+     */
+    function compareString(map, reverse) {
+      return function (a, b) {
+        if (map(a) > map(b)) {
+          return !reverse ? 1 : -1;
+        }
+        if (map(a) < map(b)) {
+          return !reverse ? -1 : 1;
+        }
+        return 0;
+      };
+    }
+
+    /**
+     * Click event handler for column header.
+     *
+     * @param      {Number}  i       Column index.
+     */
+    function columnHeaderClickHandler(i) {
+      if (sortColumn === i) {
+        sortOrder = !sortOrder;
+      } else {
+        sortColumn = i;
+        sortOrder = false;  
+      }
+
+      var mapFunction = options.columns[i].map;
+      if (options.columns[i].type === Number) {
+        options.data.sort(compareNumeric(mapFunction, sortOrder));
+      } else if (options.columns[i].type === String) {
+        options.data.sort(compareString(mapFunction, sortOrder));
+      } else {
+        return;
+      }
+
+      // redrawing visible items
+      redraw();
+    }
+
+    /**
      * Register header event handlers.
      */
     function registerHeaderHandlers() {
       $header.children().each(function (i, h) {
         $(h).on('click', function () {
-          if (options.columns[i].sort) {
-            // sorting using column sort function
-            options.columns[i].sort();
-
-            // redrawing
-            redraw();
-          }
+          columnHeaderClickHandler(i);
         });
       });
     }
@@ -194,6 +252,7 @@
       options.container += ' .big-table__body';
 
       // render list
+      options.totalCount = options.data.length;
       bigList = new BigList(options);
     }
 

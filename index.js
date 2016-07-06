@@ -11,13 +11,6 @@
     // vars
     var table;
 
-    function measureTime(fn, comment) {
-      var start = new Date().getTime();
-      fn();
-      var end = new Date().getTime();
-      console.log(comment + ': ' + (end - start));
-    }
-
     function loadData(fn) {
       $.ajax('/data/100000')
       .done(function (res) {
@@ -35,63 +28,39 @@
       var columns = [
         {
           name: '#', 
+          type: Number, 
           map: function (i) {
-            return data[i].idx; 
-          }, 
-          sort: function () {
-            measureTime(function () {
-              data.sort(function (a, b) {
-                return a.idx - b.idx;
-              });
-            }, 'Sort by index');
+            return i.idx; 
           },
           css: {'big-table__cell_col-1': true}
         },
         {
           name: 'Key', 
+          type: String,
           map: function (i) {
-            return data[i].key; 
+            return i.key; 
           }, 
-          sort: function () {
-            measureTime(function () {
-              data.sort(function (a, b) {
-                if (a.key > b.key) {
-                  return 1;
-                }
-                if (a.key < b.key) {
-                  return -1;
-                }
-                return 0;
-              });
-            }, 'Sort by key');
-          },
           css: {'big-table__cell_col-2': true}
         },
         {
           name: 'Value', 
+          type: Number,
           map: function (i) { 
-            return data[i].val.toFixed(4); 
+            return i.val; 
           },
-          sort: function () {
-            measureTime(function () {
-              data.sort(function (a, b) {
-                return a.val - b.val;
-              });
-            }, 'Sort by value');
+          format: function (i) {
+            return i.toFixed(4);
           },
           css: {'big-table__cell_col-3': true}
         },
         {
           name: 'Delta', 
+          type: Number,
           map: function (i) { 
-            return data[i].delta.toFixed(4); 
-          }, 
-          sort: function () {
-            measureTime(function () {
-              data.sort(function (a, b) {
-                return a.delta - b.delta;
-              });
-            }, 'Sort by delta');
+            return i.delta; 
+          },
+          format: function (i) {
+            return i.toFixed(4);
           },
           css: {
             'big-table__cell_col-3': true,
@@ -105,29 +74,21 @@
         },
         {
           name: 'Open?', 
+          type: Boolean,
           map: function (i) { 
-            return data[i].active ? 'open' : 'closed'; 
+            return i.active; 
           }, 
+          format: function (i) {
+            return i ? 'open' : 'closed'; 
+          },
           css: {'big-table__cell_col-2': true}
         },
         {
           name: 'Rec', 
+          type: String,
           map: function (i) { 
-            return data[i].rec; 
+            return i.rec; 
           }, 
-          sort: function () {
-            measureTime(function () {
-              data.sort(function (a, b) {
-                if (a.rec > b.rec) {
-                  return 1;
-                }
-                if (a.rec < b.rec) {
-                  return -1;
-                }
-                return 0;
-              });
-            }, 'Sort by rec');
-          },
           css: {
             'big-table__cell_col-1': true,
             'big-table__cell_font-bold': function (val) {
@@ -140,7 +101,7 @@
       // create table object
       table = new BigTable({
         container: '.big-table',
-        totalCount: data.length,
+        data: data,
         height: 500,
         itemHeight: 40,
         columns: columns
