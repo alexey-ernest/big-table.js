@@ -50,7 +50,28 @@ title | 'Name' | Column title.
 type | String | Column type for correct sorting.
 key | 'name' | Object key to get value.
 format | function (val) { return val.toFixed(4); } | Custom value formatter.
-css | {css_class: expression, ...} | Set of css classes with conditions to apply to a cell if a cell's value satisfies the condition.
+css | {css_class: expression, ...} | Set of css classes with corresponding Boolean conditions to apply to a cell if a cell's value satisfies the condition.
+
+Example:
+```
+{
+  title: 'Delta', 
+  type: Number,
+  key: 'delta',
+  format: function (i) {
+    return i.toFixed(4);
+  },
+  css: {
+    'big-table__cell_col-3': true,
+    'big-table__cell_color-red': function (val) {
+      return val < 0;
+    },
+    'big-table__cell_color-green': function (val) {
+      return val > 0;
+    }
+  }
+}
+```
 
 ## API
 
