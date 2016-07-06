@@ -12,7 +12,7 @@ High performance JavaScript table for large data sets.
 * Super fast rendering: ~10ms.
 * Items caching allows to avoid unnecessary re-rendering while scrolling fast up and down.
 * Asynchronous garbage collection executes periodically when user stops scrolling which provides smooth user experience.
-* Sortable columns: Numeric and String columns are sortable, sorting time about ~100ms for 100K data set.
+* Sortable columns: Numeric and String columns are sortable, sorting time about ~100ms for 100K data set of randomized values.
 * Custom CSS classes and value formatters.
 * Simple default css theme included.
 
