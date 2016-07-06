@@ -9,8 +9,8 @@ var RECS = ['buy', 'hold', 'sell'];
  * Generates dataset item.
  */
 function generateItem() {
-  var i, key = '';
-  for (i = 0; i < Math.random() * 5 + 1; i++) {
+  var i, key = '', len = 1 + Math.random() * 4;
+  for (i = 0; i < len; i++) {
     key += String.fromCharCode(parseInt(65 + Math.random() * 26));
   }
 

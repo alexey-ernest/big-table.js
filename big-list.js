@@ -1,6 +1,9 @@
 /*jslint white: true */
 /*global window */
 
+/**
+ * @module BigList implements virtual scrolling functionality for huge data sets.
+ */
 (function (window, $) {
   'use strict';
 
@@ -8,13 +11,14 @@
    * Creates a new instance of BigList
    *
    * @class      BigList
-   * @param      {Objects}  options    Table options.
+   * @param      {Objects}  options    List options.
    */
   function BigList (options) {
     // Default settings
     var defaults = {
+      container: null,
       height: 500,
-      itemHeight: 25,
+      itemHeight: 30,
       totalCount: 1000
     };
 
@@ -123,7 +127,7 @@
     }
 
     /**
-     * Inits a table for a container.
+     * Inits a list for a container.
      */
     function init() {
       $container = $(options.container);
@@ -164,7 +168,7 @@
     }
 
     /**
-     * Destroyes the table and all it's data.
+     * Destroyes the list and all it's data.
      */
     function destroy() {
       $container.off('scroll');

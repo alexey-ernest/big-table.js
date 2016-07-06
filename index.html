@@ -7,54 +7,75 @@
     <link rel="stylesheet" href="/style.css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="/big-list.js"></script>
+    <script src="/big-table.js"></script>
   </head>
   <body>
-    <h1>Hello</h1>
     <div class="big-table"></div>
     <script>
-
-      function createCell(text, classes) {
-        if (classes.constructor !== Array) {
-          classes = classes.split(' ');
-        }
-
-        var cell = document.createElement('div');
-        var i;
-        for (i = 0; i < classes.length; i++) {
-          cell.classList.add(classes[i]);
-        }
-
-        var textNode = document.createTextNode(text);
-        cell.appendChild(textNode);
-        return cell;
-      }
-
-      $.ajax('data/10000')
+      $.ajax('data/100000')
         .done(function (data) {
-          var table = new BigList({
+
+          var columns = [
+            {
+              name: '#', 
+              css: {'big-table__cell_col-1': true}
+            },
+            {
+              name: 'Key', 
+              map: function (i) {
+                return data[i].key; 
+              }, 
+              css: {'big-table__cell_col-2': true}
+            },
+            {
+              name: 'Value', 
+              map: function (i) { 
+                return data[i].val.toFixed(4); 
+              }, 
+              css: {'big-table__cell_col-3': true}
+            },
+            {
+              name: 'Delta', 
+              map: function (i) { 
+                return data[i].delta.toFixed(4); 
+              }, 
+              css: {
+                'big-table__cell_col-3': true,
+                'big-table__cell_color-red': function (val) {
+                  return val < 0;
+                },
+                'big-table__cell_color-green': function (val) {
+                  return val > 0;
+                }
+              }
+            },
+            {
+              name: 'Open?', 
+              map: function (i) { 
+                return data[i].active ? 'open' : 'closed'; 
+              }, 
+              css: {'big-table__cell_col-2': true}
+            },
+            {
+              name: 'Rec', 
+              map: function (i) { 
+                return data[i].rec; 
+              }, 
+              css: {
+                'big-table__cell_col-1': true,
+                'big-table__cell_font-bold': function (val) {
+                  return val !== 'hold';
+                }
+              }
+            }
+          ]
+
+          var table = new BigTable({
             container: '.big-table',
             totalCount: data.length,
-            height: 300,
+            height: 500,
             itemHeight: 40,
-            render: function (i) {
-              var row = document.createElement('div');
-              row.classList.add('big-table__row');
-              
-              var cells = [];
-              cells[0] = createCell(i, 'big-table__cell big-table__cell_col-1');
-              cells[1] = createCell(data[i].key, 'big-table__cell big-table__cell_col-2');
-              cells[2] = createCell(data[i].val, 'big-table__cell big-table__cell_col-3');
-              cells[3] = createCell(data[i].delta, 'big-table__cell big-table__cell_col-3');
-              cells[4] = createCell(data[i].active, 'big-table__cell big-table__cell_col-2');
-              cells[5] = createCell(data[i].rec, 'big-table__cell big-table__cell_col-1');
-
-              var i;
-              for (i = 0; i < cells.length; i++) {
-                row.appendChild(cells[i]);
-              }
-              
-              return $(row);
-            }
+            columns: columns
           });
         });
     </script>
