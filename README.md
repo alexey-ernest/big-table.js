@@ -2,6 +2,7 @@
 High performance JavaScript table for large data sets.
 
 * [Features](#features)
+* [Dependencies](#dependencies)
 * [How to use](#how-to-use)
 * [Options](#options)
 * [Column definition](#column-definitions)
@@ -16,10 +17,19 @@ High performance JavaScript table for large data sets.
 * Custom CSS classes and value formatters.
 * Simple default css theme included.
 
+## Dependencies
+* jQuery
+
+```
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+```
+
+
 ## How to use
 
 ```
 <link rel="stylesheet" href="/themes/default/theme.default.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="/big-list.js"></script>
 <script src="/big-table.js"></script>
 ```
