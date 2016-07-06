@@ -8,82 +8,10 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="/big-list.js"></script>
     <script src="/big-table.js"></script>
+    <script src="/index.js"></script>
   </head>
   <body>
-    <button onclick="redraw();">Redraw</button>
+    <button onclick="App.redraw();">Redraw</button>
     <div class="big-table"></div>
-    <script>
-      var table;
-      function redraw() {
-        table.redraw();
-      }
-
-      $.ajax('data/100000')
-        .done(function (data) {
-
-          var columns = [
-            {
-              name: '#', 
-              css: {'big-table__cell_col-1': true}
-            },
-            {
-              name: 'Key', 
-              map: function (i) {
-                return data[i].key; 
-              }, 
-              css: {'big-table__cell_col-2': true}
-            },
-            {
-              name: 'Value', 
-              map: function (i) { 
-                return data[i].val.toFixed(4); 
-              }, 
-              css: {'big-table__cell_col-3': true}
-            },
-            {
-              name: 'Delta', 
-              map: function (i) { 
-                return data[i].delta.toFixed(4); 
-              }, 
-              css: {
-                'big-table__cell_col-3': true,
-                'big-table__cell_color-red': function (val) {
-                  return val < 0;
-                },
-                'big-table__cell_color-green': function (val) {
-                  return val > 0;
-                }
-              }
-            },
-            {
-              name: 'Open?', 
-              map: function (i) { 
-                return data[i].active ? 'open' : 'closed'; 
-              }, 
-              css: {'big-table__cell_col-2': true}
-            },
-            {
-              name: 'Rec', 
-              map: function (i) { 
-                return data[i].rec; 
-              }, 
-              css: {
-                'big-table__cell_col-1': true,
-                'big-table__cell_font-bold': function (val) {
-                  return val !== 'hold';
-                }
-              }
-            }
-          ]
-
-          table = new BigTable({
-            container: '.big-table',
-            totalCount: data.length,
-            height: 500,
-            itemHeight: 40,
-            columns: columns
-          });
-        });
-    </script>
   </body>
 </html>
