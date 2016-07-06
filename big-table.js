@@ -27,6 +27,7 @@
 
     // Private fields
     var bigList,
+        $container,
         $header,
         sortColumn,
         sortOrder;
@@ -240,12 +241,13 @@
       validateOptions();
 
       // render table elements
+      $container = $(options.container);
+      
       $header = renderHeader();
       registerHeaderHandlers();
-
-      var $viewport = renderViewport();
-      var $container = $(options.container);
       $container.append($header);
+
+      var $viewport = renderViewport();      
       $container.append($viewport);
 
       options.container += ' .big-table__body';
@@ -264,6 +266,8 @@
 
         bigList.destroy();
         bigList = null;
+
+        $container.empty();
       }
     }
 
@@ -271,8 +275,7 @@
 
     // Public interface
     return {
-      destroy: destroy,
-      redraw: redraw
+      destroy: destroy
     };
   }
 
