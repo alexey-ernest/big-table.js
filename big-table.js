@@ -11,7 +11,7 @@
    * Creates a new instance of BigTable.
    * 
    * options.columns should be in following format: 
-   * [{title: String, type: Type, key: String, format: val1 => val2, css: {class1: val1 => true|false}}]
+   * [{title: String, type: Type, key: String, format: val1 => val2, css: {class1: val1 => {true|false}}, [sorted: {true|false}]}]
    *
    * @class      BigTable
    * @param      {Objects}  options    Table options: {container, data, columns}.
@@ -205,16 +205,17 @@
     }
 
     /**
-     * Click event handler for column header.
+     * Sorts data and redraws the table.
      *
-     * @param      {Number}      i          Column index.
+     * @param      {Number}  i       Column index.
+     * @param      {Boolean}  order  Sort order.
      */
-    function columnHeaderClickHandler(i) {
+    function sortByColumn(i, order) {
       if (sortColumn === i) {
         sortOrder = !sortOrder;
       } else {
         sortColumn = i;
-        sortOrder = false;  
+        sortOrder = order !== undefined ? !order : false;
       }
 
       // updating column heeader classes
@@ -243,7 +244,7 @@
         }
 
         $(h).on('click', function () {
-          columnHeaderClickHandler(i);
+          sortByColumn(i);
         });
       });
     }
@@ -256,6 +257,20 @@
         $(h).off('click');
       });
       $header = null;
+    }
+
+    /**
+     * Initially sorted the data by the column with 'sorted' flag.
+     */
+    function initSort() {
+      var i, sorted;
+      for (i = 0; i < options.columns.length; i+=1) {
+        sorted = options.columns[i].sorted;
+        if (sorted !== undefined) {
+          sortByColumn(i, sorted);
+          break;
+        }
+      }
     }
 
     /**
@@ -277,9 +292,11 @@
       var $viewport = renderViewport();      
       $container.append($viewport);
 
-      options.container += ' .big-table__body';
+      // apply initial sorting
+      initSort();
 
       // render list
+      options.container += ' .big-table__body';
       options.totalCount = options.data.length;
       bigList = new BigList(options);
     }
