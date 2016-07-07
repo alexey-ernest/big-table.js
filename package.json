@@ -16,7 +16,9 @@
     "table",
     "javascript",
     "high",
-    "performance"
+    "performance",
+    "virtual",
+    "scrolling"
   ],
   "author": "Alexey Melnikov",
   "license": "MIT",

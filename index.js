@@ -30,13 +30,13 @@
           title: '#', 
           type: Number, 
           key: 'idx',
-          css: {'big-table__cell_col-1': true}
+          css: {'big-table__col-1': true}
         },
         {
           title: 'Key', 
           type: String,
           key: 'key',
-          css: {'big-table__cell_col-2': true}
+          css: {'big-table__col-2': true}
         },
         {
           title: 'Value', 
@@ -45,7 +45,7 @@
           format: function (i) {
             return i.toFixed(4);
           },
-          css: {'big-table__cell_col-3': true}
+          css: {'big-table__col-3': true}
         },
         {
           title: 'Delta', 
@@ -55,7 +55,7 @@
             return i.toFixed(4);
           },
           css: {
-            'big-table__cell_col-3': true,
+            'big-table__col-3': true,
             'big-table__cell_color-red': function (val) {
               return val < 0;
             },
@@ -71,14 +71,14 @@
           format: function (i) {
             return i ? 'open' : 'closed'; 
           },
-          css: {'big-table__cell_col-2': true}
+          css: {'big-table__col-2': true}
         },
         {
           title: 'Rec', 
           type: String,
           key: 'rec',
           css: {
-            'big-table__cell_col-1': true,
+            'big-table__col-1': true,
             'big-table__cell_font-bold': function (val) {
               return val !== 'hold';
             }

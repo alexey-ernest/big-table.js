@@ -82,11 +82,11 @@
       var i, classes;
       for (i = 0; i < options.columns.length; i+=1) {
         classes = getCellClasses(i);
-        classes.push('big-table__cell');
+        classes.push('big-table__col-header');
 
         // appending cell
-        if (options.columns[i].type !== Boolean) {
-          classes.push('big-table__cell_type-sortable');
+        if (options.columns[i].type === Number || options.columns[i].type === String) {
+          classes.push('big-table__col-header-sortable');
         }
         header.appendChild(renderCell(options.columns[i].title, classes));
       }
@@ -185,9 +185,29 @@
     }
 
     /**
+     * Updates colum sort* classes according to current sort column and sort order.
+     *
+     * @param      {Number}  idx     Current sort column index.
+     * @param      {Boolean}  desc   Descending order.
+     */
+    function updateHeaderClasses(idx, desc) {
+      $header.children().each(function (i, h) {
+        var $h = $(h);
+        if (i !== idx) {
+          $h.removeClass('big-table__col-header_sorted big-table__col-header_sorted-asc big-table__col-header_sorted-desc');
+        } else {
+          $h.removeClass('big-table__col-header_sorted-asc big-table__col-header_sorted-desc');
+          var className = 'big-table__col-header_sorted ';
+          className += desc ? 'big-table__col-header_sorted-desc' : 'big-table__col-header_sorted-asc';
+          $h.addClass(className);
+        }
+      });
+    }
+
+    /**
      * Click event handler for column header.
      *
-     * @param      {Number}  i       Column index.
+     * @param      {Number}      i          Column index.
      */
     function columnHeaderClickHandler(i) {
       if (sortColumn === i) {
@@ -196,6 +216,9 @@
         sortColumn = i;
         sortOrder = false;  
       }
+
+      // updating column heeader classes
+      updateHeaderClasses(i, sortOrder);
 
       var key = options.columns[i].key;
       if (options.columns[i].type === Number) {
@@ -215,6 +238,10 @@
      */
     function registerHeaderHandlers() {
       $header.children().each(function (i, h) {
+        if (options.columns[i].type !== Number && options.columns[i].type !== String) {
+          return;
+        }
+
         $(h).on('click', function () {
           columnHeaderClickHandler(i);
         });
