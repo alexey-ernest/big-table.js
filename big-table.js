@@ -8,6 +8,22 @@
   'use strict';
 
   /**
+   * Helper function for checking if localStorage is available.
+   */
+  function localStorageAvailable() {
+    try {
+      var storage = window.localStorage,
+        x = '__storage_test__';
+      storage.setItem(x, x);
+      storage.removeItem(x);
+      return true;
+    } 
+    catch(e) {
+      return false;
+    }
+  }
+
+  /**
    * Creates a new instance of BigTable.
    * 
    * options.columns should be in following format: 
@@ -29,8 +45,8 @@
     var bigList,
         $container,
         $header,
-        sortColumn,
-        sortOrder;
+        isLocalStorageAvailable = localStorageAvailable(),
+        sortOrder = {};
 
     /**
      * Renders table cell with text.
@@ -205,33 +221,82 @@
     }
 
     /**
-     * Sorts data and redraws the table.
+     * Caches sort order.
      *
-     * @param      {Number}  i       Column index.
-     * @param      {Boolean}  order  Sort order.
+     * @param      {Object}  order   Sort order: {column, desc}.
      */
-    function sortByColumn(i, order) {
-      if (sortColumn === i) {
-        sortOrder = !sortOrder;
-      } else {
-        sortColumn = i;
-        sortOrder = order !== undefined ? !order : false;
+    function setSortOrder(order) {
+      if (order.desc === undefined) {
+        order.desc = false;
       }
 
+      if (isLocalStorageAvailable) {
+        window.localStorage.setItem('sortOrder', JSON.stringify(order));
+      } else {
+        sortOrder = order;  
+      }
+    }
+
+    /**
+     * Retrieves sort order from cache.
+     */
+    function getSortOrder() {
+      var order;
+      if (isLocalStorageAvailable) {
+        order = window.localStorage.getItem('sortOrder');
+        order = order ? JSON.parse(order) : null;
+      } else {
+        order = sortOrder;
+      }
+
+      return order || {};
+    }
+
+    /**
+     * Sorts data and redraws the table.
+     *
+     * @param      {Number}   i          Column index.
+     * @param      {Boolean}  desc       Descending order.
+     */
+    function sort(i, desc) {
       // updating column heeader classes
-      updateHeaderClasses(i, sortOrder);
+      updateHeaderClasses(i, desc);
 
       var key = options.columns[i].key;
       if (options.columns[i].type === Number) {
-        options.data.sort(compareNumeric(key, sortOrder));
+        options.data.sort(compareNumeric(key, desc));
       } else if (options.columns[i].type === String) {
-        options.data.sort(compareString(key, sortOrder));
+        options.data.sort(compareString(key, desc));
       } else {
         return;
       }
 
       // redrawing visible items
       redraw();
+    }
+
+    /**
+     * Sorts or toggles sort direction for the column.
+     *
+     * @param      {Number}   i          Column index.
+     * @param      {Boolean}  direction  Sort direction: true = asc, false = desc
+     */
+    function sortClickHandler(i, direction) {
+      // get current sort order
+      var order = getSortOrder();
+
+      if (order.column === i) {
+        order.desc = !order.desc;
+      } else {
+        order.column = i;
+        order.desc = direction !== undefined ? !direction : false;
+      }
+
+      // cache sort order
+      setSortOrder(order);
+
+      // sort
+      sort(order.column, order.desc);
     }
 
     /**
@@ -244,7 +309,7 @@
         }
 
         $(h).on('click', function () {
-          sortByColumn(i);
+          sortClickHandler(i);
         });
       });
     }
@@ -260,16 +325,22 @@
     }
 
     /**
-     * Initially sorted the data by the column with 'sorted' flag.
+     * Initially sorts the data by the column's 'sorted' flag or by the last sort order.
      */
     function initSort() {
       var i, sorted;
       for (i = 0; i < options.columns.length; i+=1) {
         sorted = options.columns[i].sorted;
         if (sorted !== undefined) {
-          sortByColumn(i, sorted);
+          sortClickHandler(i, sorted);
           break;
         }
+      }
+
+      // sorting by last sort order
+      var order = getSortOrder();
+      if (order.column) {
+        sort(order.column, order.desc);
       }
     }
 

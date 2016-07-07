@@ -30,8 +30,7 @@
           title: '#', 
           type: Number, 
           key: 'idx',
-          css: {'big-table__col-1': true},
-          sorted: true
+          css: {'big-table__col-1': true}
         },
         {
           title: 'Key', 
