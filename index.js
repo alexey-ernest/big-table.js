@@ -88,7 +88,7 @@
 
       // create table object
       table = new BigTable({
-        container: '.big-table',
+        container: '#big-table',
         data: data,
         height: 500,
         itemHeight: 40,

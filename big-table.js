@@ -42,7 +42,8 @@
     };
 
     // Private fields
-    var bigList,
+    var uid,
+        bigList,
         $container,
         $header,
         isLocalStorageAvailable = localStorageAvailable(),
@@ -221,6 +222,19 @@
     }
 
     /**
+     * Generates storage key.
+     *
+     * @param      {String}  appendix  Key appendix.
+     */
+    function getStorageKey(appendix) {
+      var key = uid;
+      if (appendix) {
+        key = appendix + key;
+      }
+      return key;
+    }
+
+    /**
      * Caches sort order.
      *
      * @param      {Object}  order   Sort order: {column, desc}.
@@ -231,7 +245,7 @@
       }
 
       if (isLocalStorageAvailable) {
-        window.localStorage.setItem('sortOrder', JSON.stringify(order));
+        window.localStorage.setItem(getStorageKey('sortOrder'), JSON.stringify(order));
       } else {
         sortOrder = order;  
       }
@@ -243,7 +257,7 @@
     function getSortOrder() {
       var order;
       if (isLocalStorageAvailable) {
-        order = window.localStorage.getItem('sortOrder');
+        order = window.localStorage.getItem(getStorageKey('sortOrder'));
         order = order ? JSON.parse(order) : null;
       } else {
         order = sortOrder;
@@ -353,8 +367,11 @@
       // validate options
       validateOptions();
 
+      uid = options.container;
+
       // render table elements
       $container = $(options.container);
+      $container.addClass('big-table');
       
       $header = renderHeader();
       registerHeaderHandlers();
