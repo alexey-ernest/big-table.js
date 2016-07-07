@@ -11,8 +11,12 @@
     // vars
     var table;
 
-    function loadData(fn) {
-      $.ajax('/data/100000')
+    function loadData(count, fn) {
+      if (!count) {
+        count = 100000;
+      }
+
+      $.ajax('/data/' + count)
       .done(function (res) {
         // set index for each item to visualize sorting order
         res.forEach(function (i, idx) {
@@ -101,12 +105,21 @@
       });
     }
 
-    function init() {
+    function init(count) {
+      if (table) {
+        table.destroy();
+      }
+
       // loading data and rendering table
-      loadData(renderTable);
+      loadData(count, renderTable);
     }
 
     init();
+
+    // Public interface
+    return {
+      init: init
+    };
   }
 
   // Export App class.
