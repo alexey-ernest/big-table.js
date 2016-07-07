@@ -36,7 +36,7 @@
           title: 'Key', 
           type: String,
           key: 'key',
-          css: {'big-table__col-2': true}
+          css: {'big-table__col-1': true}
         },
         {
           title: 'Value', 
@@ -45,7 +45,7 @@
           format: function (i) {
             return i.toFixed(4);
           },
-          css: {'big-table__col-3': true}
+          css: {'big-table__col-1': true}
         },
         {
           title: 'Delta', 
@@ -55,7 +55,7 @@
             return i.toFixed(4);
           },
           css: {
-            'big-table__col-3': true,
+            'big-table__col-1': true,
             'big-table__cell_color-red': function (val) {
               return val < 0;
             },
@@ -63,6 +63,11 @@
               return val > 0;
             }
           }
+        },
+        {
+          title: 'Link',
+          key: 'link',
+          css: {'big-table__col-5': true}
         },
         {
           title: 'Open?', 

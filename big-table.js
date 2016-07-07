@@ -50,6 +50,16 @@
         sortOrder = {};
 
     /**
+     * Helper function for checking if a text is a link.
+     *
+     * @param      {String}   text    Text to check.
+     * @return     {boolean}  True if is a link, False otherwise.
+     */
+    function isLinkText(text) {
+      return /^http(s)?:\/\//.test(text);
+    }
+
+    /**
      * Renders table cell with text.
      *
      * @param      {String}        text     Cell text.
@@ -65,8 +75,15 @@
         cell.classList.add(c);
       });
 
-      var textNode = document.createTextNode(text);
-      cell.appendChild(textNode);
+      var node = document.createTextNode(text);
+      if (isLinkText(text)) {
+        var link = document.createElement('a');
+        link.setAttribute('href', text);
+        link.appendChild(node);
+        node = link;
+      }
+      
+      cell.appendChild(node);
       return cell;
     }
 

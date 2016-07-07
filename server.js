@@ -19,7 +19,8 @@ function generateItem() {
     active: Math.random() >= 0.5,
     val: Math.random() * 1000,
     delta: Math.random() * 10 - 5,
-    rec: RECS[parseInt(Math.random() * RECS.length)]
+    rec: RECS[parseInt(Math.random() * RECS.length)],
+    link: 'https://yandex.ru/search/?text=' + key
   }
   return item;
 }
