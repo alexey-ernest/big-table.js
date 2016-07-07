@@ -78,7 +78,7 @@ type | String | Column type for correct sorting.
 key | 'name' | Object key to get value.
 format | function (val) { return val.toFixed(4); } | Custom value formatter.
 css | {css_class: expression, ...} | Set of css classes with corresponding Boolean conditions to apply to a cell if a cell's value satisfies the condition.
-sorted | {true|false} | Indicates whether the data should be initially sorted. True means ascending order, False - descending.
+sorted | true or false | Indicates whether the data should be initially sorted. True means ascending order, False - descending.
 
 Example:
 ```
