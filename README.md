@@ -6,7 +6,7 @@ High performance JavaScript table for large data sets.
 * [Dependencies](#dependencies)
 * [How to use](#how-to-use)
 * [Options](#options)
-* [Column definition](#column-definitions)
+* [Column definition](#column-definition)
 * [API](#api)
 
 ## Features
