@@ -2,33 +2,6 @@
 /*global window */
 
 /**
- * ES6 Object.assign polyfill
- */
-if (typeof Object.assign !== 'function') {
-  Object.assign = function(target) {
-    'use strict';
-
-    if (target === null) {
-      throw new TypeError('Cannot convert undefined or null to object');
-    }
-
-    target = Object(target);
-    for (var i = 1; i < arguments.length; i+=1) {
-      var source = arguments[i];
-      if (source !== null) {
-        for (var key in source) {
-          if (Object.prototype.hasOwnProperty.call(source, key)) {
-            target[key] = source[key];
-          }
-        }
-      }
-    }
-    return target;
-  };
-}
-
-
-/**
  * BigList implements virtual scrolling functionality for huge data sets.
  */
 window.BigList = (function (window) {
@@ -143,7 +116,7 @@ window.BigList = (function (window) {
       }
 
       Object.keys(garbage).forEach(function (i) {
-        garbage[i].remove();
+        container.removeChild(garbage[i]);
       });
 
       if (Object.keys(garbage).length > 0) {
@@ -154,7 +127,7 @@ window.BigList = (function (window) {
     /**
      * Scroll event handler.
      *
-     * @param      {Event}  event   JQuery Event object.
+     * @param      {Event}  event   Event object.
      */
     function onScroll(event) {
       var scrollTop = event.target.scrollTop;
@@ -195,13 +168,13 @@ window.BigList = (function (window) {
       clearNode(container);
 
       // setting styles
-      var clone = container.cloneNode();
-      clone.style.height = options.height + 'px';
-      clone.style.overflow = 'auto';
-      clone.style.position = 'relative';
-      clone.style.padding = '0';
-      clone.style.clear = 'both';
-      container.parentNode.replaceChild(clone, container);
+      container.style.display = 'none';
+      container.style.height = options.height + 'px';
+      container.style.overflow = 'auto';
+      container.style.position = 'relative';
+      container.style.padding = '0';
+      container.style.clear = 'both';
+      container.style.display = 'block';
 
       // add scroll event listener
       container.addEventListener('scroll', onScroll);
@@ -261,7 +234,7 @@ window.BigList = (function (window) {
       gc(true);
 
       // getting first and last index
-      var indexes = Object.keys(cache);
+      var indexes = Object.keys(cache).map(function (k) { return parseInt(k); });
       indexes = indexes.sort(function (a, b) {
         return a - b;
       });

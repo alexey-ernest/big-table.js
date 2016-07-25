@@ -2,9 +2,9 @@
 /*global window */
 
 /**
- * @module BigTable implements table functionality with virtual scrolling for huge data sets.
+ * BigTable implements table functionality with virtual scrolling for huge data sets.
  */
-(function (window, $, BigList) {
+window.BigTable = (function (window, BigList) {
   'use strict';
 
   /**
@@ -33,19 +33,21 @@
    * @param      {Objects}  options    Table options: {container, data, columns}.
    */
   function BigTable (options) {
+    
     // Default settings
     var defaults = {
       container: undefined,
       data: undefined,
       columns: undefined,
-      render: renderRow
+      render: createRow
     };
 
     // Private fields
-    var uid,
+    var document = window.document,
+        uid,
         bigList,
-        $container,
-        $header,
+        container,
+        header,
         isLocalStorageAvailable = localStorageAvailable(),
         sortOrder = {};
 
@@ -60,25 +62,25 @@
     }
 
     /**
-     * Renders table cell with text.
+     * Creates table cell Node.
      *
      * @param      {String}        text     Cell text.
      * @param      {String|Array}  classes  Cell css classes.
      */
-    function renderCell(text, classes) {
-      if (classes.constructor !== Array) {
+    function createCell(text, classes) {
+      if (!Array.isArray(classes)) {
         classes = classes.split(' ');
       }
 
       var cell = document.createElement('div');
-      classes.forEach(function (c) {
-        cell.classList.add(c);
-      });
+      for (var i = 0, len = classes.length; i < len; i+=1) {
+        cell.classList.add(classes[i]);
+      }
 
       var node = document.createTextNode(text);
       if (isLinkText(text)) {
         var link = document.createElement('a');
-        link.setAttribute('href', text);
+        link.href = text;
         link.appendChild(node);
         node = link;
       }
@@ -106,61 +108,65 @@
     }
 
     /**
-     * Renders header.
+     * Creates header Node.
      */
-    function renderHeader() {
+    function createHeader() {
       var header = document.createElement('div');
       header.classList.add('big-table__header');
       header.style.overflow = 'hidden';
       
-      var i, classes;
-      for (i = 0; i < options.columns.length; i+=1) {
+      var classes, cell, cellData;
+      for (var i = 0, len = options.columns.length; i < len; i+=1) {
         classes = getCellClasses(i);
         classes.push('big-table__col-header');
 
-        // appending cell
+        // appending cell class
         if (options.columns[i].type === Number || options.columns[i].type === String) {
           classes.push('big-table__col-header-sortable');
         }
-        header.appendChild(renderCell(options.columns[i].title, classes));
+
+        cell = createCell(options.columns[i].title, classes);
+        cell.setAttribute('data-idx', i); // set column index to read later
+
+        header.appendChild(cell);
       }
 
-      return $(header);
+      return header;
     }
 
     /**
-     * Renders viewport for virtual scrolling.
+     * Creates viewport for Node virtual scrolling.
      */
-    function renderViewport() {
+    function createViewport() {
       var viewport = document.createElement('div');
       viewport.classList.add('big-table__body');
-      return $(viewport);
+      return viewport;
     }
 
     /**
-     * Renders row.
+     * Creates row Node.
      *
      * @param      {number}  ridx       Row index.
      */
-    function renderRow(ridx) {
+    function createRow(ridx) {
       var row = document.createElement('div');
       row.classList.add('big-table__row');
       
-      var i, val, classes;
-      for (i = 0; i < options.columns.length; i+=1) {
-        val = options.columns[i].key ? options.data[ridx][options.columns[i].key] : '';
+      var val, classes;
+      for (var i = 0, len = options.columns.length; i < len; i+=1) {
+        val = options.columns[i].key ? options.data[ridx][options.columns[i].key] : null;
 
         classes = getCellClasses(i, val);
         classes.push('big-table__cell');
 
         // formatting value
-        val = options.columns[i].format ? options.columns[i].format(val) : val;
+        val = options.columns[i].format && options.columns[i].format(val) || val;
 
         // appending cell
-        row.appendChild(renderCell(val, classes));
+        row.appendChild(createCell(val, classes));
       }
 
-      return $(row);
+      return row;
     }
 
     /**
@@ -219,23 +225,26 @@
     }
 
     /**
-     * Updates colum sort* classes according to current sort column and sort order.
+     * Updates header colum sort* classes according to current sort column and sort order.
      *
      * @param      {Number}  idx     Current sort column index.
      * @param      {Boolean}  desc   Descending order.
      */
     function updateHeaderClasses(idx, desc) {
-      $header.children().each(function (i, h) {
-        var $h = $(h);
-        if (i !== idx) {
-          $h.removeClass('big-table__col-header_sorted big-table__col-header_sorted-asc big-table__col-header_sorted-desc');
+      var children = header.childNodes,
+          len = children.length,
+          child,
+          i;
+
+      for (i = 0; i < len; i+=1) {
+        child = children[i];
+        if (i === idx) {
+          child.classList.remove('big-table__col-header_sorted-asc', 'big-table__col-header_sorted-desc');
+          child.classList.add('big-table__col-header_sorted', desc ? 'big-table__col-header_sorted-desc' : 'big-table__col-header_sorted-asc');
         } else {
-          $h.removeClass('big-table__col-header_sorted-asc big-table__col-header_sorted-desc');
-          var className = 'big-table__col-header_sorted ';
-          className += desc ? 'big-table__col-header_sorted-desc' : 'big-table__col-header_sorted-asc';
-          $h.addClass(className);
+          child.classList.remove('big-table__col-header_sorted', 'big-table__col-header_sorted-asc', 'big-table__col-header_sorted-desc');
         }
-      });
+      }
     }
 
     /**
@@ -334,14 +343,22 @@
      * Register header event handlers.
      */
     function registerHeaderHandlers() {
-      $header.children().each(function (i, h) {
-        if (options.columns[i].type !== Number && options.columns[i].type !== String) {
+      // event delegation
+      header.addEventListener('click', function (e) {
+        // x-browser target
+        e = e || window.event;
+        var target = e.target || e.srcElement;
+
+        if (!target.classList.contains('big-table__col-header')) {
           return;
         }
 
-        $(h).on('click', function () {
-          sortClickHandler(i);
-        });
+        var idx = +target.getAttribute('data-idx');
+        if (options.columns[idx].type !== Number && options.columns[idx].type !== String) {
+          return;
+        }
+        
+        sortClickHandler(idx);
       });
     }
 
@@ -349,26 +366,23 @@
      * Deregisters header event handlers.
      */
     function deregisterHeaderHandlers() {
-      $header.children().each(function (i, h) {
-        $(h).off('click');
-      });
-      $header = null;
+      header.removeEventListener('click');
     }
 
     /**
      * Initially sorts the data by the column's 'sorted' flag or by the last sort order.
      */
     function initSort() {
-      var i, sorted;
-      for (i = 0; i < options.columns.length; i+=1) {
+      var sorted;
+      for (var i = 0, len = options.columns.length; i < len; i+=1) {
         sorted = options.columns[i].sorted;
         if (sorted !== undefined) {
           sortClickHandler(i, sorted);
-          break;
+          return;
         }
       }
 
-      // sorting by last sort order
+      // if sort order is not defined in columns, sorting by last sort order
       var order = getSortOrder();
       if (order.column) {
         sort(order.column, order.desc);
@@ -379,23 +393,30 @@
      * Inits a BigTable.
      */
     function init() {
-      options = $.extend({}, defaults, options);
+      options = Object.assign({}, defaults, options);
 
       // validate options
       validateOptions();
 
+      // using container as a unique id
       uid = options.container;
 
-      // render table elements
-      $container = $(options.container);
-      $container.addClass('big-table');
-      
-      $header = renderHeader();
-      registerHeaderHandlers();
-      $container.append($header);
+      // configure container
+      container = document.querySelector(options.container);
+      if (container === null) {
+        throw new Error('Could not find ' + options.container + ' element in the DOM.');
+      }
 
-      var $viewport = renderViewport();      
-      $container.append($viewport);
+      container.classList.add('big-table');
+      
+      // configure header
+      header = createHeader();
+      registerHeaderHandlers();
+      container.appendChild(header);
+
+      // configure viewport
+      var viewport = createViewport();      
+      container.appendChild(viewport);
 
       // apply initial sorting
       initSort();
@@ -407,19 +428,34 @@
     }
 
     /**
+     * Clears node.
+     *
+     * @param      {Node}  Node.
+     */
+    function clearNode(node) {
+      var child = node.lastChild;
+      while (child) {
+        node.removeChild(child);
+        child = node.lastChild;
+      }
+    }
+
+    /**
      * Destroys a table.
      */
     function destroy() {
       if (bigList) {
         deregisterHeaderHandlers();
+        header = null;
 
         bigList.destroy();
         bigList = null;
-
-        $container.empty();
+        
+        clearNode(container);
       }
     }
 
+    // Init
     init();
 
     // Public interface
@@ -428,9 +464,6 @@
     };
   }
 
-  // Export BigTable class.
-  $.extend(window, {
-    BigTable: BigTable
-  });
+  return BigTable;
 
-}(window, window.jQuery, window.BigList));
+}(window, window.BigList));

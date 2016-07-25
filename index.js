@@ -19,9 +19,9 @@
       $.ajax('/data/' + count)
       .done(function (res) {
         // set index for each item to visualize sorting order
-        res.forEach(function (i, idx) {
-          i.idx = idx;
-        });
+        for (var i = res.length; i--;) {
+          res[i].idx = i;
+        }
 
         fn(res);
       });
