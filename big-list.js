@@ -2,18 +2,46 @@
 /*global window */
 
 /**
- * @module BigList implements virtual scrolling functionality for huge data sets.
+ * ES6 Object.assign polyfill
  */
-(function (window, $) {
+if (typeof Object.assign !== 'function') {
+  Object.assign = function(target) {
+    'use strict';
+
+    if (target === null) {
+      throw new TypeError('Cannot convert undefined or null to object');
+    }
+
+    target = Object(target);
+    for (var i = 1; i < arguments.length; i+=1) {
+      var source = arguments[i];
+      if (source !== null) {
+        for (var key in source) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
+            target[key] = source[key];
+          }
+        }
+      }
+    }
+    return target;
+  };
+}
+
+
+/**
+ * BigList implements virtual scrolling functionality for huge data sets.
+ */
+window.BigList = (function (window) {
   'use strict';
 
   /**
-   * Creates a new instance of BigList
+   * BigList constructor function.
    *
    * @class      BigList
    * @param      {Objects}  options    List options.
    */
-  function BigList (options) {
+  function BigList(options) {
+
     // Default settings
     var defaults = {
       container: null,
@@ -23,7 +51,8 @@
     };
 
     // Private fields
-    var $container,
+    var document = window.document,
+        container,
         itemsPerScreen,
         lastRepaintOffset,
         lastScrolledTime,
@@ -35,16 +64,19 @@
      * Renders item by calling third-party render function.
      *
      * @param      {number}  idx     Item index.
+     * @return     {Node}  Item Node.
      */
     function renderItem(idx) {
       var item = options.render(idx);
 
-      return $(item)
-        .css('height', options.itemHeight + 'px')
-        .css('position', 'absolute')
-        .css('top', (idx * options.itemHeight) + 'px')
-        .css('left', '0')
-        .css('right', '0');
+      // setting required styles
+      item.style.height = options.itemHeight + 'px';
+      item.style.position = 'absolute';
+      item.style.top = (idx * options.itemHeight) + 'px';
+      item.style.left = 0;
+      item.style.right = 0;
+
+      return item;
     }
 
     /**
@@ -59,32 +91,44 @@
       }
 
       // marking invisible items for deletion
+      var item;
       Object.keys(cache).forEach(function (i) {
         if (i >= idx && i < toIdx) {
           return;
         }
 
-        garbage[i] = cache[i];
-        garbage[i].hide();
+        var item = cache[i];
+        item.style.display = 'none';
+        garbage[i] = item;
+
         delete cache[i];
       });
 
       // rendering visible items
-      var i, items = [];
-      for (i = idx; i < toIdx; i+=1) {
+      var fragment = document.createDocumentFragment();
+      for (var i = idx; i < toIdx; i+=1) {
         if (cache[i] === undefined && garbage[i] === undefined) {
-          // not yet rendered rendered
-          cache[i] = renderItem(i);
-          items.push(cache[i]);
+          // not yet rendered
+          
+          // render item
+          item = renderItem(i);
+
+          // cache item
+          cache[i] = item;
+
+          // add to the fragment
+          fragment.appendChild(item);
         } else if (garbage[i] !== undefined) {
           // not yet garbage collected
-          cache[i] = garbage[i];
-          cache[i].show();
+          item = garbage[i];
+          item.style.display = 'block';
+          cache[i] = item;
+
           delete garbage[i];
         }
       }
 
-      $container.append(items);
+      container.appendChild(fragment);
     }
 
     /**
@@ -93,7 +137,7 @@
      * @param      {boolean}  force   Indicates whether to force garbage collection.
      */
     function gc(force) {
-      if (!force && Date.now() - lastScrolledTime < 100) {
+      if (!force && new Date() - lastScrolledTime < 100) {
         // do not do garbage collection while scrolling
         return;
       }
@@ -124,41 +168,79 @@
         lastRepaintOffset = scrollTop;
       }
 
-      lastScrolledTime = Date.now();
+      lastScrolledTime = new Date();
       event.preventDefault();
+    }
+
+    /**
+     * Clears node.
+     *
+     * @param      {Node}  Node.
+     */
+    function clearNode(node) {
+      var child = node.lastChild;
+      while (child) {
+        node.removeChild(child);
+        child = node.lastChild;
+      }
+    }
+
+    /**
+     * Specifies defaults for the container element.
+     *
+     * @param      {Node}  container  The container node.
+     */
+    function initContainer(container) {
+      // empty node
+      clearNode(container);
+
+      // setting styles
+      var clone = container.cloneNode();
+      clone.style.height = options.height + 'px';
+      clone.style.overflow = 'auto';
+      clone.style.position = 'relative';
+      clone.style.padding = '0';
+      clone.style.clear = 'both';
+      container.parentNode.replaceChild(clone, container);
+
+      // add scroll event listener
+      container.addEventListener('scroll', onScroll);
+    }
+
+    /**
+     * Creates helper scroller Node.
+     *
+     * @return     {Node}  Scroller Node.
+     */
+    function createScroller() {
+      var scroller = document.createElement('div');
+      scroller.style.opacity = 0;
+      scroller.style.position = 'absolute';
+      scroller.style.top = 0;
+      scroller.style.left = 0;
+      scroller.style.width = '1px';
+      scroller.style.height = options.itemHeight * options.totalCount + 'px';
+
+      return scroller;
     }
 
     /**
      * Inits a list for a container.
      */
     function init() {
-      $container = $(options.container);
-      if ($container.length < 1) {
+      container = document.querySelector(options.container);
+      if (container === null) {
         throw new Error('Could not find ' + options.container + ' element in the DOM.');
       }
 
-      options = $.extend({}, defaults, options);
+      options = Object.assign({}, defaults, options);
 
       // init container
-      $container
-        .empty()
-        .css('height', options.height + 'px')
-        .css('overflow', 'auto')
-        .css('position', 'relative')
-        .css('padding', '0')
-        .css('clear', 'both');
-
-      $container.on('scroll', onScroll);
+      initContainer(container);
 
       // init hidden scroller
-      $('<div />')
-        .css('opacity', '0')
-        .css('position', 'absolute')
-        .css('top', 0)
-        .css('left', 0)
-        .css('width', '1px')
-        .css('height', options.itemHeight * options.totalCount + 'px')
-        .appendTo($container);
+      var scroller = createScroller();
+      container.appendChild(scroller);
 
       // calculate number of items per screen
       itemsPerScreen = Math.ceil(options.height / options.itemHeight);
@@ -175,14 +257,16 @@
      */
     function redraw() {
       // remove items
-      $.extend(garbage, cache);
+      Object.assign(garbage, cache);
       gc(true);
 
       // getting first and last index
-      var indexes = Object.keys(cache).map(function (k) { return parseInt(k); });
+      var indexes = Object.keys(cache);
       indexes = indexes.sort(function (a, b) {
         return a - b;
       });
+
+      // redraw the list
       cache = {};
       renderItemsFrom(indexes[0], indexes[indexes.length - 1] + 1);
     }
@@ -191,12 +275,12 @@
      * Destroyes the list and all it's data.
      */
     function destroy() {
-      $container.off('scroll');
+      container.removeEventListener('scroll');
       clearInterval(gcInterval);
 
-      delete this.cache;
-      delete this.garbage;
-      $container.empty();
+      cache = {};
+      garbage = {};
+      clearNode(container);
     }
 
     // Init
@@ -209,9 +293,5 @@
     };
   }
 
-  // Export BigList class.
-  $.extend(window, {
-    BigList: BigList
-  });
-
-}(window, window.jQuery));
+  return BigList;
+}(window));
