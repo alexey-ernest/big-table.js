@@ -16,15 +16,38 @@
         count = 100000;
       }
 
-      $.ajax('/data/' + count)
-      .done(function (res) {
-        // set index for each item to visualize sorting order
-        for (var i = res.length; i--;) {
-          res[i].idx = i;
-        }
+      function parseItem(str) {
+        var fields = str.split(','),
+            i = 0;
+        return {
+          idx: i,
+          key: fields[i++],
+          active: fields[i++],
+          value: +fields[i++],
+          delta: +fields[i++],
+          rec: fields[i++],
+          link: fields[i++]
+        };
+      }
 
-        fn(res);
-      });
+      $.ajax('/data/' + count)
+        .done(function (res) {
+          // parsing data
+          var itemsStr = res.split('\n'),
+              items = [],
+              len = itemsStr.length,
+              i,
+              item;
+
+          // set index for each item to visualize sorting order
+          for (i = len; i--;) {
+            item = parseItem(itemsStr[i]);
+            item.idx = i;
+            items[i] = item;
+          }
+
+          fn(items);
+        });
     }
 
     function renderTable(data) {
@@ -45,7 +68,7 @@
         {
           title: 'Value', 
           type: Number,
-          key: 'val',
+          key: 'value',
           format: function (i) {
             return i.toFixed(4);
           },

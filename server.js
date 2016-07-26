@@ -10,19 +10,20 @@ var RECS = ['buy', 'hold', 'sell'];
  */
 function generateItem() {
   var i, key = '', len = ~~(4 + Math.random() + 0.5);
-  for (i = 0; i < len; i++) {
+  for (i = 0; i < len; i+=1) {
     key += String.fromCharCode(parseInt(65 + Math.random() * 26));
   }
 
-  var item = {
-    key: key,
-    active: Math.random() >= 0.5,
-    val: Math.random() * 1000,
-    delta: Math.random() * 10 - 5,
-    rec: RECS[parseInt(Math.random() * RECS.length)],
-    link: 'https://yandex.ru/search/?text=' + key
-  }
-  return item;
+  i = 0;
+  var fields = [];
+  fields[i++] = key; // key
+  fields[i++] = Math.random() >= 0.5; // active
+  fields[i++] = Math.random() * 1000; // value
+  fields[i++] = Math.random() * 10 - 5; // delta
+  fields[i++] = RECS[parseInt(Math.random() * RECS.length)]; // rec
+  fields[i++] = 'https://yandex.ru/search/?text=' + key; // link
+
+  return fields.join(',');
 }
 
 /**
@@ -33,11 +34,11 @@ app.get('/data/:size', function (req, res) {
 
   var i = 0;
   var data = [];
-  for (i = 0; i < size; i++) {
+  for (i = 0; i < size; i+=1) {
     data[i] = generateItem();
   }
 
-  res.send(data);
+  res.send(data.join('\n'));
 });
 
 /**
