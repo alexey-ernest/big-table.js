@@ -18,6 +18,7 @@ High performance JavaScript table for large data sets.
 * Sorting order is cached and restored after a page reloads.
 * Custom CSS classes and value formatters.
 * Simple default css theme included.
+* Optimized server and client-size JavaScript native ES5 code.
 
 
 ## Demo
@@ -35,11 +36,8 @@ Go to http://localhost:3000/
 
 
 ## Dependencies
-* jQuery
+No dependencies. All the logic implemented on native ES5 JavaScript.
 
-```
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-```
 
 
 ## How to use
