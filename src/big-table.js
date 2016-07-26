@@ -414,6 +414,7 @@ window.BigTable = (function (window, BigList) {
         throw new Error('Could not find ' + options.container + ' element in the DOM.');
       }
 
+      clearNode(container);
       container.classList.add('big-table');
       
       // configure header
