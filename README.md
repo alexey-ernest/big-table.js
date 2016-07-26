@@ -45,9 +45,9 @@ No dependencies. All the logic implemented on native ES5 JavaScript.
 
 ```
 <link rel="stylesheet" href="/themes/default/theme.default.css">
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="/big-list.js"></script>
-<script src="/big-table.js"></script>
+<script src="/src/polyfills.js"></script>
+<script src="/src/big-list.js"></script>
+<script src="/src/big-table.js"></script>
 ```
 
 ```
