@@ -248,7 +248,7 @@ window.BigList = (function (window) {
      * Destroyes the list and all it's data.
      */
     function destroy() {
-      container.removeEventListener('scroll');
+      container.removeEventListener('scroll', onScroll);
       clearInterval(gcInterval);
 
       cache = {};

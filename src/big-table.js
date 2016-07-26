@@ -340,33 +340,40 @@ window.BigTable = (function (window, BigList) {
     }
 
     /**
+     * Header event listener.
+     *
+     * @param      {Event}  e       Event.
+     */
+    function headerEventListener(e) {
+      // x-browser target
+      e = e || window.event;
+      var target = e.target || e.srcElement;
+
+      if (!target.classList.contains('big-table__col-header')) {
+        return;
+      }
+
+      var idx = +target.getAttribute('data-idx');
+      if (options.columns[idx].type !== Number && options.columns[idx].type !== String) {
+        return;
+      }
+      
+      sortClickHandler(idx);
+    }
+
+    /**
      * Register header event handlers.
      */
     function registerHeaderHandlers() {
       // event delegation
-      header.addEventListener('click', function (e) {
-        // x-browser target
-        e = e || window.event;
-        var target = e.target || e.srcElement;
-
-        if (!target.classList.contains('big-table__col-header')) {
-          return;
-        }
-
-        var idx = +target.getAttribute('data-idx');
-        if (options.columns[idx].type !== Number && options.columns[idx].type !== String) {
-          return;
-        }
-        
-        sortClickHandler(idx);
-      });
+      header.addEventListener('click', headerEventListener);
     }
 
     /**
      * Deregisters header event handlers.
      */
     function deregisterHeaderHandlers() {
-      header.removeEventListener('click');
+      header.removeEventListener('click', headerEventListener);
     }
 
     /**
