@@ -2,9 +2,9 @@
 /*global window */
 
 /**
- * @module Demo application.
+ * Demo application.
  */
-(function ($, BigTable) {
+var App = (function (BigTable) {
   'use strict';
 
   function BigTableApp() {
@@ -30,24 +30,34 @@
         };
       }
 
-      $.ajax('/data/' + count)
-        .done(function (res) {
-          // parsing data
-          var itemsStr = res.split('\n'),
-              items = [],
-              len = itemsStr.length,
-              i,
-              item;
+      function parseResponse(res) {
+        // parsing data
+        var itemsStr = res.split('\n'),
+            items = [],
+            len = itemsStr.length,
+            i,
+            item;
 
-          // set index for each item to visualize sorting order
-          for (i = len; i--;) {
-            item = parseItem(itemsStr[i]);
-            item.idx = i;
-            items[i] = item;
-          }
+        // set index for each item to visualize sorting order
+        for (i = len; i--;) {
+          item = parseItem(itemsStr[i]);
+          item.idx = i;
+          items[i] = item;
+        }
 
-          fn(items);
-        });
+        fn(items);
+      }
+
+      // making request
+      var req = new XMLHttpRequest();
+      req.open('GET', '/data/' + count, true);
+      req.onreadystatechange = function() {
+        if (req.readyState == 4) {
+          parseResponse(req.responseText);
+        }
+      };
+
+      req.send(null);
     }
 
     function renderTable(data) {
@@ -145,9 +155,9 @@
     };
   }
 
-  // Export App class.
-  $.extend(window, {
-    App: new BigTableApp()
-  });
+  return BigTableApp;
 
-}(window.jQuery, window.BigTable));
+}(window.BigTable));
+
+// self init
+window.App = new App();
